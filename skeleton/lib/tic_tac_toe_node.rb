@@ -47,16 +47,21 @@ class TicTacToeNode
       (0...3).each do |col|
         pos = [row, col]
     
-    next unless board.empty?(pos)
-    new_board = board.new
+    next unless @board[row][col] == nil
+    new_board = @board.dup
     new_board.place_mark(pos)
-    children << TicTacToeNode.new(new_board, @next_mover_mark, @prev_move_pos)
+    children << TicTacToeNode.new(new_board, reverse_mark, @prev_move_pos)
       end
     end
     children
   end
 
- 
-
-
+  def reverse_mark
+    if @next_mover_mark == :x
+      @next_mover_mark = :o
+    else
+      @next_mover_mark = :x
+    end
+    @next_mover_mark
+  end
 end
