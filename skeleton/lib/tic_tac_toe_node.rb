@@ -1,20 +1,21 @@
 require_relative 'tic_tac_toe'
+require 'byebug'
 
 class TicTacToeNode 
-  attr_reader :children
+  attr_reader :board, :next_mover_mark, :prev_move_pos
+  attr_accessor :children
   def initialize(board, next_mover_mark, prev_move_pos = nil)
         @board = board
         @next_mover_mark = next_mover_mark
         @prev_move_pos = prev_move_pos
-        @tic_tac_toe = TicTacToe.new()
-        MARKS = [:X, :O]
-        @children = []
+        # @tic_tac_toe = TicTacToe.new("player1", "player2")
+        # @MARKS = [:X, :O]
   end
 
   def losing_node?(curr_mark)
     if board.over?
       return board.won? && board.winner != curr_mark
-    board_new = @board.dup
+    board_new = board.dup
     elsif next_mover_mark == curr_mark
       return children.all?{|node| node.losing_node?(curr_mark)}
     else
@@ -30,8 +31,8 @@ class TicTacToeNode
 
 
   def winning_node?(curr_mark)
-    if board.over?
-      board.winner = curr_mark
+    if @board.over?
+      @board.winner = curr_mark
     elsif self.next_mover_mark == curr_mark
       self.children.any?{|node| node.winning_node?(curr_mark)}
     else
@@ -42,18 +43,29 @@ class TicTacToeNode
   # This method generates an array of all moves that can be made after
   # the current move.
   def children
-    children = []
-    (0...3).each do |row|
-      (0...3).each do |col|
-        pos = [row, col]
-    
-    next unless @board[row][col] == nil
-    new_board = @board.dup
-    new_board.place_mark(pos)
-    children << TicTacToeNode.new(new_board, reverse_mark, @prev_move_pos)
+    #1 Return all possible game states one move after current node
+    #2 Iterate through all the positions that are empty? on the board opbject
+    #3 For each empty positon create a node by duping the board and putting a next_mover_mark in the position
+    #4 Alternate the mark
+    children_array = Array.new
+    @board.rows.each_with_index do |row, idx1|
+      row.each_with_index do |pos, idx2|
+        
+        if pos == nil && @next_mover_mark == :x
+          dupe = @board.dup
+          pos = [idx1, idx2]
+          dupe[pos] = :x
+          children_array << TicTacToeNode.new(dupe, :o, [idx1, idx2])
+
+        elsif pos == nil && @next_mover_mark == :o
+          dupe = @board.dup
+          pos = [idx1, idx2]
+          dupe[pos] = :x
+          children_array << TicTacToeNode.new(dupe, :x, [idx1, idx2])
+        end
       end
     end
-    children
+    children_array
   end
 
   def reverse_mark
